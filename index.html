@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <base target="_self">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeSphere | منصة البرمجة ثلاثية الأبعاد</title>
+    <meta name="description" content="منصة تعلم البرمجة ثلاثية الأبعاد مع ملخصات وأكواد للمجالات التقنية المختلفة">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        frontend: "#3b82f6",
+                        backend: "#10b981",
+                        mobile: "#8b5cf6",
+                        game: "#ef4444",
+                        ai: "#f59e0b",
+                        desktop: "#6366f1",
+                        dark: "#0f172a",
+                        light: "#f8fafc"
+                    },
+                    fontFamily: {
+                        'cairo': ['Cairo', 'sans-serif']
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'spin-slow': 'spin 20s linear infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+        .tech-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .tech-card:hover {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+        .code-block {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            border-left: 4px solid;
+        }
+        .sphere-container {
+            perspective: 1000px;
+        }
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes rotateSphere {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+    </style>
+</head>
+<body class="text-gray-100 font-cairo min-h-screen">
+    <!-- Header -->
+    <header class="bg-dark/90 backdrop-blur-lg sticky top-0 z-50 border-b border-gray-800">
+        <nav class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-gradient-to-r from-frontend to-backend rounded-full flex items-center justify-center">
+                            <i class="fas fa-cube text-white text-xl"></i>
+                        </div>
+                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-ai rounded-full animate-pulse"></div>
+                    </div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-frontend to-ai bg-clip-text text-transparent">
+                        CodeSphere
+                    </h1>
+                </div>
+                
+                <div class="hidden lg:flex space-x-8 space-x-reverse">
+                    <a href="#" class="tech-nav hover:text-frontend transition-all duration-300" onclick="navigateTo('hero')">الرئيسية</a>
+                    <a href="#" class="tech-nav hover:text-backend transition-all duration-300" onclick="navigateTo('domains')">المجالات</a>
+                    <a href="#" class="tech-nav hover:text-mobile transition-all duration-300" onclick="navigateTo('codes')">الأكواد</a>
+                    <a href="#" class="tech-nav hover:text-game transition-all duration-300" onclick="navigateTo('3d-view')">العرض 3D</a>
+                    <a href="#" class="tech-nav hover:text-ai transition-all duration-300" onclick="navigateTo('resources')">المصادر</a>
+                </div>
+                
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button class="px-6 py-2 bg-gradient-to-r from-frontend to-backend text-white rounded-lg font-semibold hover:opacity-90 transition-all" onclick="navigateTo('login')">
+                        <i class="fas fa-user mr-2"></i>تسجيل الدخول
+                    </button>
+                    <button class="lg:hidden text-white" onclick="toggle3DMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 3D Mobile Menu -->
+            <div id="mobile3DMenu" class="hidden lg:hidden mt-6 bg-dark/95 backdrop-blur-lg rounded-xl p-6 border border-gray-700">
+                <div class="grid grid-cols-2 gap-4">
+                    <a href="#" class="block p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-all border border-gray-700 hover:border-frontend" onclick="navigateTo('hero')">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <i class="fas fa-home text-frontend"></i>
+                            <span>الرئيسية</span>
+                        </div>
+                    </a>
+                    <a href="#" class="block p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-all border border-gray-700 hover:border-backend" onclick="navigateTo('domains')">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <i class="fas fa-layer-group text-backend"></i>
+                            <span>المجالات</span>
+                        </div>
+                    </a>
+                    <a href="#" class="block p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-all border border-gray-700 hover:border-mobile" onclick="navigateTo('codes')">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <i class="fas fa-code text-mobile"></i>
+                            <span>الأكواد</span>
+                        </div>
+                    </a>
+                    <a href="#" class="block p-4 bg-gray-800/50 rounded-lg hover:bg-gray-700/50 transition-all border border-gray-700 hover:border-game" onclick="navigateTo('3d-view')">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <i class="fas fa-cube text-game"></i>
+                            <span>العرض 3D</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section with 3D Elements -->
+    <section id="hero" class="relative overflow-hidden py-20">
+        <div class="absolute inset-0 bg-gradient-to-b from-dark via-gray-900 to-dark"></div>
+        
+        <!-- Animated background elements -->
+        <div class="absolute top-10 left-10 w-64 h-64 bg-frontend/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-backend/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 left-1/3 w-48 h-48 bg-ai/10 rounded-full blur-3xl"></div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center justify-between">
+                <div class="lg:w-1/2 mb-12 lg:mb-0">
+                    <div class="inline-flex items-center px-4 py-2 bg-frontend/20 rounded-full mb-6 border border-frontend/30">
+                        <span class="text-sm font-semibold text-frontend">🚀 منصة البرمجة ثلاثية الأبعاد</span>
+                    </div>
+                    
+                    <h1 class="text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                        استكشف عالم
+                        <span class="bg-gradient-to-r from-frontend via-ai to-game bg-clip-text text-transparent">البرمجة</span>
+                        <br>بعدٍ جديد
+                    </h1>
+                    
+                    <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                        تعلم البرمجة من خلال تجربة ثلاثية الأبعاد تفاعلية. استكشف جميع مجالات التطوير 
+                        من Frontend إلى AI مع أكواد عملية وملخصات شاملة.
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4">
+                        <button class="px-8 py-3 bg-gradient-to-r from-frontend to-backend text-white rounded-lg font-bold text-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onclick="start3DTour()">
+                            <i class="fas fa-play mr-2"></i>ابدأ الجولة 3D
+                        </button>
+                        <button class="px-8 py-3 bg-gray-800/50 text-white rounded-lg font-bold text-lg border border-gray-700 hover:border-frontend hover:bg-gray-800 transition-all duration-300" onclick="navigateTo('domains')">
+                            <i class="fas fa-compass mr-2"></i>استكشف المجالات
+                        </button>
+                    </div>
+                    
+                    <!-- Stats -->
+                    <div class="grid grid-cols-3 gap-6 mt-12">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-frontend mb-2">6</div>
+                            <div class="text-gray-400">مجالات تقنية</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-backend mb-2">250+</div>
+                            <div class="text-gray-400">نموذج كود</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-ai mb-2">50+</div>
+                            <div class="text-gray-400">مشروع عملي</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3D Sphere Visualization -->
+                <div class="lg:w-1/2">
+                    <div class="relative sphere-container">
+                        <div class="w-96 h-96 mx-auto">
+                            <!-- Interactive 3D Sphere -->
+                            <div id="techSphere" class="w-full h-full rounded-full relative">
+                                <!-- Sphere Core -->
+                                <div class="absolute inset-0 bg-gradient-to-r from-dark to-gray-900 rounded-full shadow-2xl"></div>
+                                
+                                <!-- Floating Tech Elements -->
+                                <div class="absolute top-1/4 left-1/4 floating-element">
+                                    <div class="w-16 h-16 bg-frontend/20 rounded-full flex items-center justify-center border-2 border-frontend/50">
+                                        <i class="fas fa-code text-frontend text-2xl"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="absolute top-1/3 right-1/4 floating-element" style="animation-delay: 1s;">
+                                    <div class="w-16 h-16 bg-backend/20 rounded-full flex items-center justify-center border-2 border-backend/50">
+                                        <i class="fas fa-server text-backend text-2xl"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="absolute bottom-1/4 left-1/3 floating-element" style="animation-delay: 2s;">
+                                    <div class="w-16 h-16 bg-game/20 rounded-full flex items-center justify-center border-2 border-game/50">
+                                        <i class="fas fa-gamepad text-game text-2xl"></i>
+                                    </div>
+                                </div>
+                                
+                                <div class="absolute bottom-1/3 right-1/3 floating-element" style="animation-delay: 3s;">
+                                    <div class="w-16 h-16 bg-ai/20 rounded-full flex items-center justify-center border-2 border-ai/50">
+                                        <i class="fas fa-brain text-ai text-2xl"></i>
+                                    </div>
+                                </div>
+                                
+                                <!-- Rotating rings -->
+                                <div class="absolute inset-0 border-2 border-frontend/30 rounded-full animate-spin-slow"></div>
+                                <div class="absolute inset-8 border-2 border-backend/30 rounded-full animate-spin-slow" style="animation-direction: reverse;"></div>
+                                <div class="absolute inset-16 border-2 border-game/30 rounded-full animate-spin-slow"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tech labels around sphere -->
+                        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4">
+                            <div class="px-4 py-2 bg-frontend/20 rounded-full border border-frontend/30">
+                                <span class="text-sm font-semibold text-frontend">Frontend</span>
+                            </div>
+                        </div>
+                        <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-4">
+                            <div class="px-4 py-2 bg-backend/20 rounded-full border border-backend/30">
+                                <span class="text-sm font-semibold text-backend">Backend</span>
+                            </div>
+                        </div>
+                        <div class="absolute top-1/2 right-0 transform translate-x-4 -translate-y-1/2">
+                            <div class="px-4 py-2 bg-game/20 rounded-full border border-game/30">
+                                <span class="text-sm font-semibold text-game">Game Dev</span>
+                            </div>
+                        </div>
+                        <div class="absolute top-1/2 left-0 transform -translate-x-4 -translate-y-1/2">
+                            <div class="px-4 py-2 bg-ai/20 rounded-full border border-ai/30">
+                                <span class="text-sm font-semibold text-ai">AI/ML</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Domains Section -->
+    <section id="domains" class="py-20 bg-gray-900/50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">مجالات <span class="bg-gradient-to-r from-frontend to-ai bg-clip-text text-transparent">التطوير</span></h2>
+                <p class="text-gray-400 text-xl max-w-3xl mx-auto">استكشف جميع مجالات البرمجة مع ملخصات شاملة وأمثلة عملية</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Frontend Card -->
+                <div class="tech-card bg-gradient-to-br from-gray-900 to-dark rounded-2xl p-8 border border-gray-800 hover:border-frontend glow hover:shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 bg-frontend/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-paint-brush text-frontend text-2xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-frontend/20 text-frontend rounded-full text-sm font-semibold">+15 تقنية</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 text-white">Frontend Development</h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        تطوير واجهات المستخدم التفاعلية باستخدام HTML, CSS, JavaScript. 
+                        تعلم React, Vue, Angular وبناء تجارب مستخدم ممتازة.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">React</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-frontend rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Vue.js</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-frontend rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">TypeScript</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-frontend rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full py-3 bg-frontend/20 text-frontend rounded-lg font-semibold hover:bg-frontend/30 transition-all border border-frontend/30" onclick="exploreDomain('frontend')">
+                        <i class="fas fa-arrow-left ml-2"></i>استكشف المجال
+                    </button>
+                </div>
+                
+                <!-- Backend Card -->
+                <div class="tech-card bg-gradient-to-br from-gray-900 to-dark rounded-2xl p-8 border border-gray-800 hover:border-backend glow hover:shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 bg-backend/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-server text-backend text-2xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-backend/20 text-backend rounded-full text-sm font-semibold">+12 لغة</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 text-white">Backend Development</h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        تطوير الخوادم وقواعد البيانات والأنظمة الخلفية. 
+                        تعلم Node.js, Python, Java وبناء APIs متينة.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Node.js</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-backend rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Python</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-backend rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Databases</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-backend rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full py-3 bg-backend/20 text-backend rounded-lg font-semibold hover:bg-backend/30 transition-all border border-backend/30" onclick="exploreDomain('backend')">
+                        <i class="fas fa-arrow-left ml-2"></i>استكشف المجال
+                    </button>
+                </div>
+                
+                <!-- Mobile Development Card -->
+                <div class="tech-card bg-gradient-to-br from-gray-900 to-dark rounded-2xl p-8 border border-gray-800 hover:border-mobile glow hover:shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 bg-mobile/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-mobile-alt text-mobile text-2xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-mobile/20 text-mobile rounded-full text-sm font-semibold">+8 إطار عمل</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 text-white">Mobile App Development</h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        تطوير تطبيقات الهواتف لنظامي iOS و Android. 
+                        تعلم React Native, Flutter, Swift وبناء تطبيقات أصيلة.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">React Native</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-mobile rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Flutter</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-mobile rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Swift</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-mobile rounded-full" style="width: 82%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full py-3 bg-mobile/20 text-mobile rounded-lg font-semibold hover:bg-mobile/30 transition-all border border-mobile/30" onclick="exploreDomain('mobile')">
+                        <i class="fas fa-arrow-left ml-2"></i>استكشف المجال
+                    </button>
+                </div>
+                
+                <!-- Game Development Card -->
+                <div class="tech-card bg-gradient-to-br from-gray-900 to-dark rounded-2xl p-8 border border-gray-800 hover:border-game glow hover:shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 bg-game/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-gamepad text-game text-2xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-game/20 text-game rounded-full text-sm font-semibold">+6 محرك</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 text-white">Game Development</h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        تطوير الألعاب ثنائية وثلاثية الأبعاد. 
+                        تعلم Unity, Unreal Engine, C# وبناء عواف تفاعلية.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Unity</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-game rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Unreal Engine</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-game rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">C#</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-game rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full py-3 bg-game/20 text-game rounded-lg font-semibold hover:bg-game/30 transition-all border border-game/30" onclick="exploreDomain('game')">
+                        <i class="fas fa-arrow-left ml-2"></i>استكشف المجال
+                    </button>
+                </div>
+                
+                <!-- AI/ML Card -->
+                <div class="tech-card bg-gradient-to-br from-gray-900 to-dark rounded-2xl p-8 border border-gray-800 hover:border-ai glow hover:shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 bg-ai/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-brain text-ai text-2xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-ai/20 text-ai rounded-full text-sm font-semibold">+10 مكتبة</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 text-white">AI & Machine Learning</h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        تطوير نماذج الذكاء الاصطناعي والتعلم الآلي. 
+                        تعلم TensorFlow, PyTorch, Python وبناء حلول ذكية.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">TensorFlow</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-ai rounded-full" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">PyTorch</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-ai rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Python ML</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-ai rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full py-3 bg-ai/20 text-ai rounded-lg font-semibold hover:bg-ai/30 transition-all border border-ai/30" onclick="exploreDomain('ai')">
+                        <i class="fas fa-arrow-left ml-2"></i>استكشف المجال
+                    </button>
+                </div>
+                
+                <!-- Desktop Development Card -->
+                <div class="tech-card bg-gradient-to-br from-gray-900 to-dark rounded-2xl p-8 border border-gray-800 hover:border-desktop glow hover:shadow-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 bg-desktop/20 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-desktop text-desktop text-2xl"></i>
+                        </div>
+                        <span class="px-3 py-1 bg-desktop/20 text-desktop rounded-full text-sm font-semibold">+5 إطار</span>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 text-white">Desktop Development</h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        تطوير تطبيقات سطح المكتب لأنظمة Windows, macOS, Linux. 
+                        تعلم Electron, Qt, C++ وبناء تطبيقات قوية.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Electron</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-desktop rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">Qt</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-desktop rounded-full" style="width: 82%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-gray-300">C++</span>
+                            <div class="w-24 h-2 bg-gray-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-desktop rounded-full" style="width: 88%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="w-full py-3 bg-desktop/20 text-desktop rounded-lg font-semibold hover:bg-desktop/30 transition-all border border-desktop/30" onclick="exploreDomain('desktop')">
+                        <i class="fas fa-arrow-left ml-2"></i>استكشف المجال
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Code Examples Section -->
+    <section id="codes" class="py-20 bg-dark">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">أمثلة <span class="bg-gradient-to-r from-backend to-mobile bg-clip-text text-transparent">الأكواد</span></h2>
+                <p class="text-gray-400 text-xl max-w-3xl mx-auto">شاهد أكواد عملية من جميع المجالات مع شرح تفصيلي</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Frontend Code Example -->
+                <div class="bg-gray-900/50 rounded-2xl p-8 border border-gray-800 hover:border-frontend transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <div class="w-10 h-10 bg-frontend/20 rounded-lg flex items-center justify-center">
+                                <i class="fab fa-react text-frontend"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">React Component</h3>
+                                <p class="text-gray-400 text-sm">Frontend Development</p>
+                            </div>
+                        </div>
+                        <button class="px-4 py-2 bg-frontend/20 text-frontend rounded-lg text-sm hover:bg-frontend/30 transition-all" onclick="copyCode('frontend-code')">
+                            <i class="fas fa-copy mr-2"></i>نسخ الكود
+                        </button>
+                    </div>
+                    
+                    <div class="code-block rounded-lg p-6 mb-6 border-l-4 border-frontend">
+                        <pre id="frontend-code" class="text-sm overflow-x-auto text-gray-300">
+<span class="text-blue-400">import</span> React, { useState } <span class="text-blue-400">from</span> <span class="text-green-400">'react'</span>;
+
+<span class="text-blue-400">function</span> <span class="text-yellow-400">Counter</span>() {
+    <span class="text-blue-400">const</span> [count, setCount] = <span class="text-yellow-400">useState</span>(<span class="text-orange-400">0</span>);
+    
+    <span class="text-blue-400">const</span> increment = () => {
+        setCount(count + <span class="text-orange-400">1</span>);
+    };
+    
+    <span class="text-blue-400">const</span> decrement = () => {
+        setCount(count - <span class="text-orange-400">1</span>);
+    };
+    
+    <span class="text-blue-400">return</span> (
+        &lt;div className=<span class="text-green-400">"counter"</span>&gt;
+            &lt;h2&gt;Counter: {count}&lt;/h2&gt;
+            &lt;button onClick={increment}&gt;+&lt;/button&gt;
+            &lt;button onClick={decrement}&gt;-&lt;/button&gt;
+        &lt;/div&gt;
+    );
+}
+
+<span class="text-blue-400">export default</span> Counter;
+                        </pre>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <h4 class="font-bold text-white mb-2"><i class="fas fa-info-circle text-frontend mr-2"></i>ملخص:</h4>
+                        <p class="text-gray-300 text-sm">
+                            هذا مكون React بسيط يستخدم useState لإدارة حالة عداد. 
+                            يوضح كيفية استخدام hooks في React لإنشاء مكونات تفاعلية.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Backend Code Example -->
+                <div class="bg-gray-900/50 rounded-2xl p-8 border border-gray-800 hover:border-backend transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <div class="w-10 h-10 bg-backend/20 rounded-lg flex items-center justify-center">
+                                <i class="fab fa-node-js text-backend"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Node.js API</h3>
+                                <p class="text-gray-400 text-sm">Backend Development</p>
+                            </div>
+                        </div>
+                        <button class="px-4 py-2 bg-backend/20 text-backend rounded-lg text-sm hover:bg-backend/30 transition-all" onclick="copyCode('backend-code')">
+                            <i class="fas fa-copy mr-2"></i>نسخ الكود
+                        </button>
+                    </div>
+                    
+                    <div class="code-block rounded-lg p-6 mb-6 border-l-4 border-backend">
+                        <pre id="backend-code" class="text-sm overflow-x-auto text-gray-300">
+<span class="text-blue-400">const</span> express = <span class="text-yellow-400">require</span>(<span class="text-green-400">'express'</span>);
+<span class="text-blue-400">const</span> app = <span class="text-yellow-400">express</span>();
+
+<span class="text-gray-500">// Middleware</span>
+app.<span class="text-yellow-400">use</span>(express.<span class="text-yellow-400">json</span>());
+
+<span class="text-gray-500">// Routes</span>
+app.<span class="text-yellow-400">get</span>(<span class="text-green-400">'/api/users'</span>, (req, res) => {
+    <span class="text-blue-400">const</span> users = [
+        { id: <span class="text-orange-400">1</span>, name: <span class="text-green-400">'John'</span> },
+        { id: <span class="text-orange-400">2</span>, name: <span class="text-green-400">'Jane'</span> }
+    ];
+    res.<span class="text-yellow-400">json</span>(users);
+});
+
+app.<span class="text-yellow-400">post</span>(<span class="text-green-400">'/api/users'</span>, (req, res) => {
+    <span class="text-blue-400">const</span> newUser = req.body;
+    <span class="text-gray-500">// Save to database...</span>
+    res.<span class="text-yellow-400">status</span>(<span class="text-orange-400">201</span>).<span class="text-yellow-400">json</span>(newUser);
+});
+
+<span class="text-gray-500">// Start server</span>
+<span class="text-blue-400">const</span> PORT = process.env.PORT || <span class="text-orange-400">3000</span>;
+app.<span class="text-yellow-400">listen</span>(PORT, () => {
+    console.<span class="text-yellow-400">log</span>(<span class="text-green-400">`Server running on port ${PORT}`</span>);
+});
+                        </pre>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <h4 class="font-bold text-white mb-2"><i class="fas fa-info-circle text-backend mr-2"></i>ملخص:</h4>
+                        <p class="text-gray-300 text-sm">
+                            خادم Node.js بسيط باستخدام Express.js. 
+                            يوضح كيفية إنشاء REST API مع نقاط نهاية GET و POST.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- AI Code Example -->
+                <div class="bg-gray-900/50 rounded-2xl p-8 border border-gray-800 hover:border-ai transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <div class="w-10 h-10 bg-ai/20 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-brain text-ai"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Linear Regression</h3>
+                                <p class="text-gray-400 text-sm">AI & Machine Learning</p>
+                            </div>
+                        </div>
+                        <button class="px-4 py-2 bg-ai/20 text-ai rounded-lg text-sm hover:bg-ai/30 transition-all" onclick="copyCode('ai-code')">
+                            <i class="fas fa-copy mr-2"></i>نسخ الكود
+                        </button>
+                    </div>
+                    
+                    <div class="code-block rounded-lg p-6 mb-6 border-l-4 border-ai">
+                        <pre id="ai-code" class="text-sm overflow-x-auto text-gray-300">
+<span class="text-blue-400">import</span> numpy <span class="text-blue-400">as</span> np
+<span class="text-blue-400">from</span> sklearn.linear_model <span class="text-blue-400">import</span> LinearRegression
+<span class="text-blue-400">from</span> sklearn.model_selection <span class="text-blue-400">import</span> train_test_split
+
+<span class="text-gray-500"># Generate sample data</span>
+X = np.random.rand(<span class="text-orange-400">100</span>, <span class="text-orange-400">1</span>) * <span class="text-orange-400">10</span>
+y = <span class="text-orange-400">2</span> * X + <span class="text-orange-400">3</span> + np.random.randn(<span class="text-orange-400">100</span>, <span class="text-orange-400">1</span>)
+
+<span class="text-gray-500"># Split data</span>
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=<span class="text-orange-400">0.2</span>, random_state=<span class="text-orange-400">42</span>
+)
+
+<span class="text-gray-500"># Create and train model</span>
+model = LinearRegression()
+model.<span class="text-yellow-400">fit</span>(X_train, y_train)
+
+<span class="text-gray-500"># Predict and evaluate</span>
+predictions = model.<span class="text-yellow-400">predict</span>(X_test)
+score = model.<span class="text-yellow-400">score</span>(X_test, y_test)
+
+<span class="text-blue-400">print</span>(<span class="text-green-400">f"Model score: {score:.2f}"</span>)
+<span class="text-blue-400">print</span>(<span class="text-green-400">f"Slope: {model.coef_[0][0]:.2f}"</span>)
+<span class="text-blue-400">print</span>(<span class="text-green-400">f"Intercept: {model.intercept_[0]:.2f}"</span>)
+                        </pre>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <h4 class="font-bold text-white mb-2"><i class="fas fa-info-circle text-ai mr-2"></i>ملخص:</h4>
+                        <p class="text-gray-300 text-sm">
+                            نموذج انحدار خطي باستخدام scikit-learn. 
+                            يوضح كيفية تحضير البيانات، تدريب النموذج، وتقييم الأداء.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Game Dev Code Example -->
+                <div class="bg-gray-900/50 rounded-2xl p-8 border border-gray-800 hover:border-game transition-all">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <div class="w-10 h-10 bg-game/20 rounded-lg flex items-center justify-center">
+                                <i class="fab fa-unity text-game"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-white">Unity Player Controller</h3>
+                                <p class="text-gray-400 text-sm">Game Development</p>
+                            </div>
+                        </div>
+                        <button class="px-4 py-2 bg-game/20 text-game rounded-lg text-sm hover:bg-game/30 transition-all" onclick="copyCode('game-code')">
+                            <i class="fas fa-copy mr-2"></i>نسخ الكود
+                        </button>
+                    </div>
+                    
+                    <div class="code-block rounded-lg p-6 mb-6 border-l-4 border-game">
+                        <pre id="game-code" class="text-sm overflow-x-auto text-gray-300">
+<span class="text-blue-400">using</span> UnityEngine;
+
+<span class="text-blue-400">public class</span> <span class="text-yellow-400">PlayerController</span> : MonoBehaviour
+{
+    <span class="text-blue-400">public</span> <span class="text-blue-400">float</span> speed = <span class="text-orange-400">5f</span>;
+    <span class="text-blue-400">public</span> <span class="text-blue-400">float</span> jumpForce = <span class="text-orange-400">10f</span>;
+    <span class="text-blue-400">private</span> Rigidbody rb;
+    <span class="text-blue-400">private</span> <span class="text-blue-400">bool</span> isGrounded;
+
+    <span class="text-blue-400">void</span> <span class="text-yellow-400">Start</span>()
+    {
+        rb = GetComponent&lt;Rigidbody&gt;();
+    }
+
+    <span class="text-blue-400">void</span> <span class="text-yellow-400">Update</span>()
+    {
+        <span class="text-gray-500">// Movement</span>
+        <span class="text-blue-400">float</span> moveHorizontal = Input.GetAxis(<span class="text-green-400">"Horizontal"</span>);
+        <span class="text-blue-400">float</span> moveVertical = Input.GetAxis(<span class="text-green-400">"Vertical"</span>);
+        
+        Vector3 movement = <span class="text-blue-400">new</span> Vector3(moveHorizontal, <span class="text-orange-400">0</span>, moveVertical);
+        rb.AddForce(movement * speed);
+
+        <span class="text-gray-500">// Jump</span>
+        <span class="text-blue-400">if</span> (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        {
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            isGrounded = <span class="text-blue-400">false</span>;
+        }
+    }
+
+    <span class="text-blue-400">void</span> <span class="text-yellow-400">OnCollisionEnter</span>(Collision collision)
+    {
+        <span class="text-blue-400">if</span> (collision.gameObject.CompareTag(<span class="text-green-400">"Ground"</span>))
+        {
+            isGrounded = <span class="text-blue-400">true</span>;
+        }
+    }
+}
+                        </pre>
+                    </div>
+                    
+                    <div class="bg-gray-800/50 rounded-lg p-4">
+                        <h4 class="font-bold text-white mb-2"><i class="fas fa-info-circle text-game mr-2"></i>ملخص:</h4>
+                        <p class="text-gray-300 text-sm">
+                            وحدة تحكم لاعب في Unity باستخدام C#. 
+                            تتيح الحركة في الاتجاهات الأربعة والقفز عند ملامسة الأرض.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <button class="px-8 py-3 bg-gradient-to-r from-frontend to-backend text-white rounded-lg font-bold text-lg hover:shadow-xl hover:scale-105 transition-all duration-300" onclick="navigateTo('more-codes')">
+                    <i class="fas fa-code mr-2"></i>عرض المزيد من الأكواد
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive 3D View -->
+    <section id="3d-view" class="py-20 bg-gradient-to-b from-dark to-gray-900">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">العرض <span class="bg-gradient-to-r from-game to-ai bg-clip-text text-transparent">ثلاثي الأبعاد</span></h2>
+                <p class="text-gray-400 text-xl max-w-3xl mx-auto">استكشف علاقات المجالات التقنية في فضاء ثلاثي الأبعاد تفاعلي</p>
+            </div>
+            
+            <div class="bg-gray-900/50 rounded-2xl p-8 border border-gray-800">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <div class="lg:w-2/3">
+                        <!-- 3D Interactive Canvas -->
+                        <div class="relative bg-gray-950 rounded-xl h-96 overflow-hidden border border-gray-700">
+                            <div id="3d-canvas" class="w-full h-full flex items-center justify-center">
+                                <!-- Interactive 3D Nodes -->
+                                <div class="relative w-full h-full">
+                                    <!-- Central Node -->
+                                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                                        <div class="w-24 h-24 bg-gradient-to-r from-frontend to-backend rounded-full flex items-center justify-center animate-pulse-slow">
+                                            <i class="fas fa-code text-white text-3xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Orbiting Nodes -->
+                                    <div class="absolute top-1/2 left-1/2 orbit-node" style="animation-delay: 0s;">
+                                        <div class="w-16 h-16 bg-frontend/20 rounded-full flex items-center justify-center border-2 border-frontend/50">
+                                            <i class="fab fa-react text-frontend text-xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="absolute top-1/2 left-1/2 orbit-node" style="animation-delay: 1s;">
+                                        <div class="w-16 h-16 bg-backend/20 rounded-full flex items-center justify-center border-2 border-backend/50">
+                                            <i class="fab fa-node-js text-backend text-xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="absolute top-1/2 left-1/2 orbit-node" style="animation-delay: 2s;">
+                                        <div class="w-16 h-16 bg-mobile/20 rounded-full flex items-center justify-center border-2 border-mobile/50">
+                                            <i class="fab fa-swift text-mobile text-xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="absolute top-1/2 left-1/2 orbit-node" style="animation-delay: 3s;">
+                                        <div class="w-16 h-16 bg-game/20 rounded-full flex items-center justify-center border-2 border-game/50">
+                                            <i class="fab fa-unity text-game text-xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="absolute top-1/2 left-1/2 orbit-node" style="animation-delay: 4s;">
+                                        <div class="w-16 h-16 bg-ai/20 rounded-full flex items-center justify-center border-2 border-ai/50">
+                                            <i class="fas fa-brain text-ai text-xl"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="absolute top-1/2 left-1/2 orbit-node" style="animation-delay: 5s;">
+                                        <div class="w-16 h-16 bg-desktop/20 rounded-full flex items-center justify-center border-2 border-desktop/50">
+                                            <i class="fas fa-desktop text-desktop text-xl"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Controls -->
+                            <div class="absolute bottom-4 left-4 flex space-x-3 space-x-reverse">
+                                <button class="px-4 py-2 bg-gray-800/80 text-white rounded-lg hover:bg-gray-700/80 transition-all" onclick="rotate3DView('left')">
+                                    <i class="fas fa-arrow-left"></i>
+                                </button>
+                                <button class="px-4 py-2 bg-gray-800/80 text-white rounded-lg hover:bg-gray-700/80 transition-all" onclick="rotate3DView('right')">
+                                    <i class="fas fa-arrow-right"></i>
+                                </button>
+                                <button class="px-4 py-2 bg-gray-800/80 text-white rounded-lg hover:bg-gray-700/80 transition-all" onclick="zoom3DView('in')">
+                                    <i class="fas fa-search-plus"></i>
+                                </button>
+                                <button class="px-4 py-2 bg-gray-800/80 text-white rounded-lg hover:bg-gray-700/80 transition-all" onclick="zoom3DView('out')">
+                                    <i class="fas fa-search-minus"></i>
+                                </button>
+                                <button class="px-4 py-2 bg-frontend/80 text-white rounded-lg hover:bg-frontend transition-all" onclick="reset3DView()">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/3">
+                        <div class="bg-gray-800/30 rounded-xl p-6 h-96 overflow-y-auto">
+                            <h3 class="text-xl font-bold mb-6 text-white">تفاصيل المجال المحدد</h3>
+                            
+                            <div id="domain-details">
+                                <div class="text-center py-12">
+                                    <i class="fas fa-mouse-pointer text-4xl text-gray-500 mb-4"></i>
+                                    <p class="text-gray-400">انقر على عقدة في العرض ثلاثي الأبعاد لعرض التفاصيل</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Stats -->
+                            <div class="mt-8 pt-6 border-t border-gray-700">
+                                <h4 class="font-bold text-white mb-4">إحصائيات سريعة</h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                                        <div class="text-2xl font-bold text-frontend">6</div>
+                                        <div class="text-sm text-gray-400">مجالات رئيسية</div>
+                                    </div>
+                                    <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                                        <div class="text-2xl font-bold text-backend">48</div>
+                                        <div class="text-sm text-gray-400">تقنية فرعية</div>
+                                    </div>
+                                    <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                                        <div class="text-2xl font-bold text-ai">250+</div>
+                                        <div class="text-sm text-gray-400">نموذج كود</div>
+                                    </div>
+                                    <div class="bg-gray-800/50 rounded-lg p-3 text-center">
+                                        <div class="text-2xl font-bold text-game">120+</div>
+                                        <div class="text-sm text-gray-400">مشروع عملي</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="mt-8 grid grid-cols-2 md:grid-cols-6 gap-4">
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-4 h-4 bg-frontend rounded-full"></div>
+                        <span class="text-sm text-gray-300">Frontend</span>
+                    </div>
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-4 h-4 bg-backend rounded-full"></div>
+                        <span class="text-sm text-gray-300">Backend</span>
+                    </div>
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-4 h-4 bg-mobile rounded-full"></div>
+                        <span class="text-sm text-gray-300">Mobile</span>
+                    </div>
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-4 h-4 bg-game rounded-full"></div>
+                        <span class="text-sm text-gray-300">Game Dev</span>
+                    </div>
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-4 h-4 bg-ai rounded-full"></div>
+                        <span class="text-sm text-gray-300">AI/ML</span>
+                    </div>
+                    <div class="flex items-center space-x-3 space-x-reverse">
+                        <div class="w-4 h-4 bg-desktop rounded-full"></div>
+                        <span class="text-sm text-gray-300">Desktop</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resources Section -->
+    <section id="resources" class="py-20 bg-gray-900/50">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">مصادر <span class="bg-gradient-to-r from-mobile to-desktop bg-clip-text text-transparent">التعلم</span></h2>
+                <p class="text-gray-400 text-xl max-w-3xl mx-auto">مواد تعليمية شاملة لجميع مجالات البرمجة</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Documentation -->
+                <div class="bg-dark rounded-2xl p-8 border border-gray-800 hover:border-frontend transition-all">
+                    <div class="w-16 h-16 bg-frontend/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-book text-frontend text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">الوثائق التفاعلية</h3>
+                    <p class="text-gray-400 mb-6">
+                        وثائق شاملة مع أمثلة حية وتجارب تفاعلية. 
+                        تعلم من خلال التطبيق العملي الفوري.
+                    </p>
+                    <button class="px-6 py-3 bg-frontend/20 text-frontend rounded-lg font-semibold hover:bg-frontend/30 transition-all" onclick="navigateTo('docs')">
+                        <i class="fas fa-external-link-alt mr-2"></i>استكشف الوثائق
+                    </button>
+                </div>
+                
+                <!-- Video Tutorials -->
+                <div class="bg-dark rounded-2xl p-8 border border-gray-800 hover:border-backend transition-all">
+                    <div class="w-16 h-16 bg-backend/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-video text-backend text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">دروس فيديو</h3>
+                    <p class="text-gray-400 mb-6">
+                        دروس فيديو عالية الجودة تغطي جميع المستويات. 
+                        من المبتدئين إلى المحترفين في جميع المجالات.
+                    </p>
+                    <button class="px-6 py-3 bg-backend/20 text-backend rounded-lg font-semibold hover:bg-backend/30 transition-all" onclick="navigateTo('videos')">
+                        <i class="fas fa-play-circle mr-2"></i>مشاهدة الدروس
+                    </button>
+                </div>
+                
+                <!-- Community Projects -->
+                <div class="bg-dark rounded-2xl p-8 border border-gray-800 hover:border-ai transition-all">
+                    <div class="w-16 h-16 bg-ai/20 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-ai text-2xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-white">مشاريع المجتمع</h3>
+                    <p class="text-gray-400 mb-6">
+                        تعاون في مشاريع حقيقية مع مبرمجين آخرين. 
+                        طور مهاراتك من خلال العمل الجماعي.
+                    </p>
+                    <button class="px-6 py-3 bg-ai/20 text-ai rounded-lg font-semibold hover:bg-ai/30 transition-all" onclick="navigateTo('projects')">
+                        <i class="fas fa-project-diagram mr-2"></i>انضم للمشاريع
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark border-t border-gray-800 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <div class="flex items-center space-x-3 space-x-reverse mb-6">
+                        <div class="relative">
+                            <div class="w-10 h-10 bg-gradient-to-r from-frontend to-backend rounded-full flex items-center justify-center">
+                                <i class="fas fa-cube text-white"></i>
+                            </div>
+                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-ai rounded-full animate-pulse"></div>
+                        </div>
+                        <h3 class="text-2xl font-bold bg-gradient-to-r from-frontend to-ai bg-clip-text text-transparent">
+                            CodeSphere
+                        </h3>
+                    </div>
+                    <p class="text-gray-400">
+                        منصة البرمجة ثلاثية الأبعاد الأولى من نوعها. 
+                        تعلم، استكشف، وطور مهاراتك في عالم البرمجة.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-6">المجالات</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-frontend transition-colors" onclick="exploreDomain('frontend')">Frontend Development</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-backend transition-colors" onclick="exploreDomain('backend')">Backend Development</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-mobile transition-colors" onclick="exploreDomain('mobile')">Mobile Development</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-game transition-colors" onclick="exploreDomain('game')">Game Development</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-6">الموارد</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-ai transition-colors" onclick="navigateTo('codes')">الأكواد والملخصات</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-desktop transition-colors" onclick="navigateTo('docs')">الوثائق</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-frontend transition-colors" onclick="navigateTo('videos')">دروس الفيديو</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-backend transition-colors" onclick="navigateTo('projects')">المشاريع</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold text-white mb-6">التواصل</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <i class="fas fa-envelope text-frontend"></i>
+                            <span class="text-gray-400">contact@codesphere.com</span>
+                        </div>
+                        <div class="flex items-center space-x-3 space-x-reverse">
+                            <i class="fas fa-globe text-backend"></i>
+                            <span class="text-gray-400">www.codesphere.com</span>
+                        </div>
+                        <div class="flex space-x-4 space-x-reverse mt-4">
+                            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-frontend transition-all">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-backend transition-all">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-mobile transition-all">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-ai transition-all">
+                                <i class="fab fa-discord"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>© 2024 CodeSphere. جميع الحقوق محفوظة. تصميم ثلاثي الأبعاد للتعليم البرمجي.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Define data at the beginning
+        const techDomains = [
+            { 
+                id: 'frontend',
+                name: 'Frontend Development',
+                color: '#3b82f6',
+                icon: 'fas fa-paint-brush',
+                description: 'تطوير واجهات المستخدم التفاعلية',
+                technologies: ['HTML', 'CSS', 'JavaScript', 'React', 'Vue.js', 'Angular', 'TypeScript'],
+                codeExamples: 85,
+                projects: 42
+            },
+            { 
+                id: 'backend',
+                name: 'Backend Development',
+                color: '#10b981',
+                icon: 'fas fa-server',
+                description: 'تطوير الخوادم وقواعد البيانات',
+                technologies: ['Node.js', 'Python', 'Java', 'PHP', 'Go', 'Ruby', 'Databases'],
+                codeExamples: 72,
+                projects: 38
+            },
+            { 
+                id: 'mobile',
+                name: 'Mobile App Development',
+                color: '#8b5cf6',
+                icon: 'fas fa-mobile-alt',
+                description: 'تطوير تطبيقات الهواتف',
+                technologies: ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Android', 'iOS'],
+                codeExamples: 58,
+                projects: 35
+            },
+            { 
+                id: 'game',
+                name: 'Game Development',
+                color: '#ef4444',
+                icon: 'fas fa-gamepad',
+                description: 'تطوير الألعاب ثنائية وثلاثية الأبعاد',
+                technologies: ['Unity', 'Unreal Engine', 'C#', 'C++', 'Game Design', '3D Modeling'],
+                codeExamples: 45,
+                projects: 28
+            },
+            { 
+                id: 'ai',
+                name: 'AI & Machine Learning',
+                color: '#f59e0b',
+                icon: 'fas fa-brain',
+                description: 'تطوير الذكاء الاصطناعي والتعلم الآلي',
+                technologies: ['Python', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'NLP', 'Computer Vision'],
+                codeExamples: 63,
+                projects: 31
+            },
+            { 
+                id: 'desktop',
+                name: 'Desktop Development',
+                color: '#6366f1',
+                icon: 'fas fa-desktop',
+                description: 'تطوير تطبيقات سطح المكتب',
+                technologies: ['Electron', 'Qt', 'C++', 'JavaFX', '.NET', 'WPF'],
+                codeExamples: 32,
+                projects: 22
+            }
+        ];
+
+        // Initialize Three.js 3D Scene
+        let scene, camera, renderer, controls;
+        
+        function init3DScene() {
+            // This would initialize a Three.js scene in a real implementation
+            // For now, we'll create a simplified version with CSS animations
+            createOrbitAnimations();
+        }
+        
+        function createOrbitAnimations() {
+            const orbitNodes = document.querySelectorAll('.orbit-node');
+            orbitNodes.forEach((node, index) => {
+                const angle = (index / orbitNodes.length) * Math.PI * 2;
+                const radius = 120;
+                const x = Math.cos(angle) * radius;
+                const y = Math.sin(angle) * radius;
+                
+                // Create keyframes for orbit animation
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes orbit-${index} {
+                        0% {
+                            transform: translate(${x}px, ${y}px) rotate(0deg) translateX(${radius}px) rotate(0deg);
+                        }
+                        100% {
+                            transform: translate(${x}px, ${y}px) rotate(360deg) translateX(${radius}px) rotate(-360deg);
+                        }
+                    }
+                    .orbit-node:nth-child(${index + 2}) {
+                        animation: orbit-${index} 20s linear infinite ${index}s;
+                    }
+                `;
+                document.head.appendChild(style);
+            });
+        }
+        
+        // Navigation function
+        function navigateTo(section) {
+            event.preventDefault();
+            const element = document.getElementById(section);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                showNotification(`سيتم توجيهك إلى قسم ${section}`, 'info');
+            }
+        }
+        
+        // Explore domain
+        function exploreDomain(domainId) {
+            event.preventDefault();
+            const domain = techDomains.find(d => d.id === domainId);
+            if (domain) {
+                const details = document.getElementById('domain-details');
+                details.innerHTML = `
+                    <div class="bg-gray-800/50 rounded-xl p-6">
+                        <div class="flex items-center space-x-4 space-x-reverse mb-6">
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center" style="background-color: ${domain.color}20; border-color: ${domain.color}50"}>
+                                <i class="${domain.icon}" style="color: ${domain.color}"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-bold text-white">${domain.name}</h4>
+                                <p class="text-gray-400">${domain.description}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h5 class="font-bold text-white mb-3">التقنيات الرئيسية:</h5>
+                            <div class="flex flex-wrap gap-2">
+                                ${domain.technologies.map(tech => `
+                                    <span class="px-3 py-1 bg-gray-700/50 text-gray-300 rounded-full text-sm">
+                                        ${tech}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-gray-800/30 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-white">${domain.codeExamples}</div>
+                                <div class="text-sm text-gray-400">نموذج كود</div>
+                            </div>
+                            <div class="bg-gray-800/30 rounded-lg p-4 text-center">
+                                <div class="text-2xl font-bold text-white">${domain.projects}</div>
+                                <div class="text-sm text-gray-400">مشروع عملي</div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-6 py-3 rounded-lg font-semibold transition-all border" 
+                                style="background-color: ${domain.color}20; color: ${domain.color}; border-color: ${domain.color}30"
+                                onclick="viewDomainContent('${domainId}')">
+                            <i class="fas fa-arrow-left ml-2"></i>استكشف المحتوى
+                        </button>
+                    </div>
+                `;
+                
+                // Highlight corresponding node
+                highlight3DNode(domainId);
+                showNotification(`جاري عرض تفاصيل ${domain.name}`, 'info');
+            }
+        }
+        
+        // Start 3D tour
+        function start3DTour() {
+            showNotification('جاري بدء الجولة ثلاثية الأبعاد...', 'info');
+            
+            // Simulate tour sequence
+            const domains = ['frontend', 'backend', 'mobile', 'game', 'ai', 'desktop'];
+            let index = 0;
+            
+            const tourInterval = setInterval(() => {
+                exploreDomain(domains[index]);
+                index++;
+                
+                if (index >= domains.length) {
+                    clearInterval(tourInterval);
+                    showNotification('اكتملت الجولة! استكشف المجالات بالتفصيل', 'success');
+                }
+            }, 2000);
+        }
+        
+        // Copy code to clipboard
+        function copyCode(elementId) {
+            const codeElement = document.getElementById(elementId);
+            const codeText = codeElement.textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                showNotification('تم نسخ الكود إلى الحافظة!', 'success');
+            }).catch(err => {
+                showNotification('حدث خطأ في نسخ الكود', 'error');
+            });
+        }
+        
+        // Toggle mobile menu
+        function toggle3DMenu() {
+            const menu = document.getElementById('mobile3DMenu');
+            menu.classList.toggle('hidden');
+        }
+        
+        // 3D View controls
+        function rotate3DView(direction) {
+            const sphere = document.getElementById('techSphere');
+            const currentRotation = sphere.style.transform || 'rotateY(0deg)';
+            let rotation = parseInt(currentRotation.match(/\d+/)[0]) || 0;
+            
+            if (direction === 'left') {
+                rotation -= 45;
+            } else {
+                rotation += 45;
+            }
+            
+            sphere.style.transform = `rotateY(${rotation}deg)`;
+            showNotification(`تدوير العرض ${direction === 'left' ? 'يساراً' : 'يميناً'}`, 'info');
+        }
+        
+        function zoom3DView(direction) {
+            const sphere = document.getElementById('techSphere');
+            const currentScale = sphere.style.scale || '1';
+            let scale = parseFloat(currentScale);
+            
+            if (direction === 'in') {
+                scale *= 1.2;
+            } else {
+                scale *= 0.8;
+            }
+            
+            sphere.style.scale = scale.toString();
+            showNotification(`تكبير العرض ${direction === 'in' ? 'تكبير' : 'تصغير'}`, 'info');
+        }
+        
+        function reset3DView() {
+            const sphere = document.getElementById('techSphere');
+            sphere.style.transform = 'rotateY(0deg)';
+            sphere.style.scale = '1';
+            showNotification('تم إعادة تعيين العرض', 'info');
+        }
+        
+        function highlight3DNode(domainId) {
+            // Remove all highlights
+            document.querySelectorAll('.orbit-node > div').forEach(node => {
+                node.style.boxShadow = 'none';
+            });
+            
+            // Add highlight to selected node
+            const domainIndex = techDomains.findIndex(d => d.id === domainId);
+            const nodes = document.querySelectorAll('.orbit-node > div');
+            if (nodes[domainIndex]) {
+                const domain = techDomains[domainIndex];
+                nodes[domainIndex].style.boxShadow = `0 0 20px ${domain.color}`;
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 left-4 px-6 py-3 rounded-lg shadow-lg z-50 transform transition-all duration-300 ${
+                type === 'success' ? 'bg-green-500/90' : 
+                type === 'error' ? 'bg-red-500/90' : 
+                'bg-blue-500/90'
+            } text-white backdrop-blur-sm`;
+            notification.textContent = message;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(-100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // View domain content
+        function viewDomainContent(domainId) {
+            const domain = techDomains.find(d => d.id === domainId);
+            if (domain) {
+                navigateTo('codes');
+                showNotification(`جاري تحميل محتوى ${domain.name}...`, 'info');
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            init3DScene();
+            
+            // Make tech sphere interactive
+            const sphere = document.getElementById('techSphere');
+            sphere.addEventListener('click', function(e) {
+                // Simulate random domain selection on click
+                const randomDomain = techDomains[Math.floor(Math.random() * techDomains.length)];
+                exploreDomain(randomDomain.id);
+            });
+            
+            // Add hover effects to orbit nodes
+            document.querySelectorAll('.orbit-node > div').forEach((node, index) => {
+                node.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.2)';
+                });
+                
+                node.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+                
+                node.addEventListener('click', function() {
+                    const domain = techDomains[index];
+                    if (domain) {
+                        exploreDomain(domain.id);
+                    }
+                });
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'c') {
+                    // Copy code from focused code block
+                    const focused = document.querySelector('.code-block pre:focus-within');
+                    if (focused) {
+                        copyCode(focused.id);
+                    }
+                }
+                
+                if (e.key === 'ArrowLeft') rotate3DView('left');
+                if (e.key === 'ArrowRight') rotate3DView('right');
+                if (e.key === '+') zoom3DView('in');
+                if (e.key === '-') zoom3DView('out');
+                if (e.key === 'r') reset3DView();
+                if (e.key === 't') start3DTour();
+            });
+            
+            // Add smooth scroll behavior
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    navigateTo(targetId);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
